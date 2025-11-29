@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <rect width="100%" height="100%" fill="#f8fff3"/>
+  <circle cx="70" cy="85" r="28" fill="#ffb4a2" />
+  <rect x="48" y="120" width="44" height="70" rx="8" fill="#9be7ff" />
+  <circle cx="200" cy="100" r="36" fill="#ffd6a5" />
+  <rect x="180" y="140" width="44" height="70" rx="8" fill="#ffdfba" />
+  <rect x="300" y="150" width="60" height="30" rx="6" fill="#e6b8a2"/>
+  <text x="12" y="260" font-size="13" fill="#444">Neighbors sharing a plate</text>
+</svg>

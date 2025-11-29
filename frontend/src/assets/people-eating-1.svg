@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <rect width="100%" height="100%" fill="#fff"/>
+  <circle cx="80" cy="70" r="36" fill="#ffd6a5" />
+  <rect x="56" y="110" width="48" height="70" rx="10" fill="#c7f9cc" />
+  <path d="M180 150 c30 -18 70 -18 100 0" stroke="#b5838d" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <circle cx="320" cy="90" r="30" fill="#caffbf" />
+  <rect x="300" y="120" width="40" height="60" rx="8" fill="#ffc8dd" />
+  <rect x="130" y="170" width="140" height="20" rx="10" fill="#f6bd60"/> 
+  <text x="15" y="250" font-size="13" fill="#444">Community Meal</text>
+</svg>
