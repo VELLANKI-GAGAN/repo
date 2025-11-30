@@ -104,9 +104,61 @@ const FoodDonorDashboard = () => {
 
   if (loading) return <div className="loading">Loading...</div>;
 
+  // If the donor has no real listings yet, provide demo sample listings so the dashboard is meaningful
+  const demoListings = [
+    {
+      _id: 'demo-listing-1',
+      title: 'Fresh Veg Box',
+      description: 'A box of fresh seasonal vegetables — perfect for community meals.',
+      category: 'produce',
+      quantity: 24,
+      unit: 'boxes',
+      reservedQuantity: 0,
+      expirationDate: new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString(),
+      status: 'available',
+      storageRequirements: 'room_temperature',
+      pickupLocation: { city: 'Bengaluru', state: 'KA' }
+    },
+    {
+      _id: 'demo-listing-2',
+      title: 'Baked Goods - Fresh Loaves',
+      description: 'A batch of freshly baked bread loaves from the bakery.',
+      category: 'bakery',
+      quantity: 36,
+      unit: 'items',
+      reservedQuantity: 4,
+      expirationDate: new Date(Date.now() + 2 * 24 * 3600 * 1000).toISOString(),
+      status: 'available',
+      storageRequirements: 'room_temperature',
+      pickupLocation: { city: 'Chennai', state: 'TN' }
+    }
+  ];
+
   // Calculate statistics
   const totalListings = listings.length;
   const totalDonations = donations.length;
+
+  // Demo donations show when there are no real donations
+  const demoDonations = [
+    {
+      _id: 'demo-donation-1',
+      foodListing: { title: 'Fresh Veg Box' },
+      recipient: { organizationName: 'Community Kitchen A' , name: 'Community Kitchen A'},
+      status: 'pending',
+      requestedQuantity: 4,
+      peopleServed: 0,
+      wasteReduced: 5
+    },
+    {
+      _id: 'demo-donation-2',
+      foodListing: { title: 'Baked Goods - Fresh Loaves' },
+      recipient: { organizationName: 'Shelter Home B', name: 'Shelter Home B' },
+      status: 'confirmed',
+      requestedQuantity: 8,
+      peopleServed: 0,
+      wasteReduced: 2
+    }
+  ];
   const completedDonations = donations.filter(d => d.status === 'completed').length;
   const pendingRequests = donations.filter(d => d.status === 'pending').length;
   const totalWasteReduced = donations
@@ -318,8 +370,9 @@ const FoodDonorDashboard = () => {
       <div className="section">
         <h2>My Food Listings</h2>
         <div className="listings-grid">
-          {listings.map((listing) => (
+          {(listings.length > 0 ? listings : demoListings).map((listing) => (
             <div key={listing._id} className="listing-card">
+              {String(listing._id).startsWith('demo') && <div className="demo-badge">Demo</div>}
               <h3>{listing.title}</h3>
               <p className="description">{listing.description}</p>
               <div className="listing-details">
@@ -346,11 +399,12 @@ const FoodDonorDashboard = () => {
         <h2>Donation Requests</h2>
         
         {/* Recent Donations Summary */}
-        {donations.length > 0 && (
+        {(donations.length > 0 ? donations : demoDonations).length > 0 && (
           <div style={{marginBottom: '20px', padding: '15px', background: '#f8f9fa', borderRadius: '8px'}}>
             <h3 style={{marginTop: 0}}>Recent Donations</h3>
-            {donations.slice(0, 3).map((donation) => (
+            {(donations.length > 0 ? donations : demoDonations).slice(0, 3).map((donation) => (
               <div key={donation._id} style={{padding: '8px 0', borderBottom: '1px solid #dee2e6'}}>
+                {String(donation._id).startsWith('demo') && <span style={{background:'#FFECB3', padding:'2px 8px', borderRadius:'6px', marginRight:'10px', color:'#7A4A00'}}>Demo</span>}
                 <strong>{donation.foodListing?.title}</strong> to <strong>{donation.recipient?.organizationName || donation.recipient?.name}</strong>
                 <span style={{marginLeft: '10px', color: donation.status === 'completed' ? '#28a745' : donation.status === 'confirmed' ? '#007bff' : '#ffc107'}}>
                   ({donation.status})
@@ -375,7 +429,7 @@ const FoodDonorDashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {donations.map((donation) => (
+              {(donations.length > 0 ? donations : demoDonations).map((donation) => (
                 <tr key={donation._id}>
                   <td>{donation.foodListing?.title}</td>
                   <td>{donation.recipient?.name}</td>

@@ -28,3 +28,25 @@ npm run dev
 ```
 
 Then open the development server URL printed by Vite (usually http://localhost:5173).
+
+Note: by default the landing page (`/`) will now be shown even when a user is already authenticated. If you are logged in and want to reach your dashboard, use the "Go to dashboard" button in the hero (or log out first). This keeps the index page visible for everyone.
+
+Show sample/demo data
+---------------------
+The donor and recipient dashboards now display demo cards when your database doesn't contain listings or donations yet — helping you preview the UI right away. If you want the backend to be populated with real sample data, run the backend seed script (from the `backend` folder):
+
+```powershell
+cd backend
+npm run seed
+```
+
+The seed script creates example donors, recipients, food listings and donation requests for development/demo purposes.
+
+Admin notes
+-----------
+There is a default super-admin used for initial setup. By default this account is:
+
+- email: admin@gmail.com
+- password: admin123
+
+Only this super-admin account is allowed to create additional admin users using the protected backend endpoint (POST /api/auth/register-admin). Admins are NOT creatable via the public registration UI.

@@ -1,18 +1,19 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
 import User from '../models/User.js';
-import { generateToken } from '../middleware/auth.js';
+import { generateToken, protect, authorize } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // @route   POST /api/auth/register
 // @desc    Register a new user
 // @access  Public
+// Public registration — admin role is not allowed here (admins are created only by the super-admin)
 router.post('/register', [
   body('name').trim().notEmpty().withMessage('Name is required'),
   body('email').isEmail().withMessage('Valid email is required'),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-  body('role').isIn(['admin', 'food_donor', 'recipient_org', 'data_analyst']).withMessage('Invalid role')
+  body('role').isIn(['food_donor', 'recipient_org', 'data_analyst']).withMessage('Invalid role')
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -114,12 +115,12 @@ router.post('/login', [
 
 // @route   POST /api/auth/register-admin
 // @desc    Register a new admin user (internal use only)
-// @access  Public with secret key
-router.post('/register-admin', [
+// @access  Protected — only the super-admin (configured by env) can create admins
+// Middleware: protect + authorize('admin') ensures caller is an active admin
+router.post('/register-admin', protect, authorize('admin'), [
   body('name').trim().notEmpty().withMessage('Name is required'),
   body('email').isEmail().withMessage('Valid email is required'),
-  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-  body('adminSecret').notEmpty().withMessage('Admin secret is required')
+  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -127,13 +128,12 @@ router.post('/register-admin', [
   }
 
   try {
-    const { name, email, password, adminSecret } = req.body;
-    
-    // Check admin secret (hardcoded for security)
-    const ADMIN_SECRET = process.env.ADMIN_SECRET || 'food_waste_admin_2024';
-    
-    if (adminSecret !== ADMIN_SECRET) {
-      return res.status(403).json({ message: 'Invalid admin secret' });
+    const { name, email, password } = req.body;
+
+    // Only allow the configured super-admin email to create other admins
+    const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || 'admin@gmail.com';
+    if (!req.user || req.user.email !== SUPER_ADMIN_EMAIL) {
+      return res.status(403).json({ message: 'Only the super-admin is authorized to create admin users' });
     }
 
     // Check if user already exists

@@ -6,6 +6,8 @@ import HeroPeople from '../assets/people-eating-hero.svg';
 import People1 from '../assets/people-eating-1.svg';
 import People2 from '../assets/people-eating-2.svg';
 import People3 from '../assets/people-eating-3.svg';
+// Local photo used in the About section — SVG fallback ensures it displays even if a JPG placeholder wasn't provided
+import PeoplePhoto from '../assets/people-eating-photo.svg';
 
 const IndexPage = () => {
   const [showLogin, setShowLogin] = useState(false);
@@ -25,7 +27,7 @@ const IndexPage = () => {
     organizationName: '',
     recipientType: '',
     phone: '',
-    adminSecret: ''
+    // adminSecret removed — admin creation is not allowed via public registration
   });
   
   const [loginError, setLoginError] = useState('');
@@ -36,28 +38,9 @@ const IndexPage = () => {
   const { login, register, user, loading } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect authenticated users to their dashboard
-  useEffect(() => {
-    if (!loading && user) {
-      switch (user.role) {
-        case 'admin':
-          navigate('/admin');
-          break;
-        case 'food_donor':
-          navigate('/donor');
-          break;
-        case 'recipient_org':
-          navigate('/recipient');
-          break;
-        case 'data_analyst':
-          navigate('/analyst');
-          break;
-        default:
-          // Stay on index page if role is unknown
-          break;
-      }
-    }
-  }, [user, loading, navigate]);
+  // Do NOT automatically redirect logged-in users away from the landing page.
+  // Keeping the IndexPage visible is a better UX — provide an explicit "Go to dashboard" button below
+  // if the user is authenticated instead of forcing a redirect on mount.
 
   // Don't render anything while checking auth status
   if (loading) {
@@ -131,40 +114,12 @@ const IndexPage = () => {
     setRegisterLoading(true);
     
     try {
-      // Check if this is an admin registration
-      if (registerData.role === 'admin') {
-        // For admin registration, we need the admin secret
-        if (!registerData.adminSecret) {
-          setRegisterError('Admin secret is required for admin registration');
+        // Disallow public admin registration — register-admin requires super-admin auth
+        if (registerData.role === 'admin') {
+          setRegisterError('Admin accounts cannot be created via public registration. Contact the super-admin.');
           setRegisterLoading(false);
           return;
-        }
-        
-        // Call admin registration endpoint
-        const response = await fetch('/api/auth/register-admin', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            name: registerData.name,
-            email: registerData.email,
-            password: registerData.password,
-            adminSecret: registerData.adminSecret
-          })
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-          // Store token and user data
-          localStorage.setItem('token', data.token);
-          // Navigate to admin dashboard
-          navigate('/admin');
         } else {
-          setRegisterError(data.message || 'Admin registration failed');
-        }
-      } else {
         // Regular user registration
         const { confirmPassword, ...registrationData } = registerData;
         const result = await register(registrationData);
@@ -208,6 +163,25 @@ const IndexPage = () => {
     return descriptions[role] || '';
   };
 
+    const roleHero = {
+      food_donor: {
+        title: 'List surplus food — Reduce waste and help others',
+        subtitle: 'Share extra meals and connect with organizations in need. Quick, safe, and impactful.'
+      },
+      recipient_org: {
+        title: 'Request donations — Feed your community',
+        subtitle: 'Request nutritious food donations and coordinate deliveries for the people you serve.'
+      },
+      data_analyst: {
+        title: 'Analyze impact — Turn data into action',
+        subtitle: 'Track trends, uncover hotspots of waste, and measure the platform’s impact.'
+      },
+      admin: {
+        title: 'Manage the platform',
+        subtitle: 'Admins maintain users, listings and analytics to ensure the system runs smoothly.'
+      }
+    };
+
   return (
     <div className="index-page">
       {/* Header with Roles */}
@@ -217,23 +191,51 @@ const IndexPage = () => {
           <nav className="roles-nav">
             <button 
               className={`role-button ${activeRole === 'food_donor' ? 'active' : ''}`}
-              onClick={() => setActiveRole('food_donor')}
+              onClick={() => {
+                setActiveRole('food_donor');
+                setLoginData({...loginData, role: 'food_donor'});
+                setRegisterData({...registerData, role: 'food_donor'});
+              }}
             >
               Food Donor
             </button>
             <button 
               className={`role-button ${activeRole === 'recipient_org' ? 'active' : ''}`}
-              onClick={() => setActiveRole('recipient_org')}
+              onClick={() => {
+                setActiveRole('recipient_org');
+                setLoginData({...loginData, role: 'recipient_org'});
+                setRegisterData({...registerData, role: 'recipient_org'});
+              }}
             >
               Recipient
             </button>
+            {/* Admin role is not shown here to prevent users from registering admins from the UI */}
             <button 
               className={`role-button ${activeRole === 'data_analyst' ? 'active' : ''}`}
-              onClick={() => setActiveRole('data_analyst')}
+              onClick={() => {
+                setActiveRole('data_analyst');
+                setLoginData({...loginData, role: 'data_analyst'});
+                setRegisterData({...registerData, role: 'data_analyst'});
+              }}
             >
               Data Analyst
             </button>
           </nav>
+          <div className="auth-nav">
+            <a className="role-about" href="#about">About</a>
+            <button
+              className="role-login"
+              onClick={() => navigate(`/login?role=${activeRole}`)}
+            >
+              Login
+            </button>
+            <button
+              className="role-register"
+              onClick={() => navigate(`/register?role=${activeRole}`)}
+            >
+              Register
+            </button>
+          </div>
         </div>
       </header>
 
@@ -241,32 +243,92 @@ const IndexPage = () => {
       <section className="hero-section">
         <div className="hero-content">
           <div className="hero-text">
-            <h2>Reduce Food Waste, Help Communities</h2>
+            <h2>{roleHero[activeRole]?.title ?? 'Reduce Food Waste, Help Communities'}</h2>
             <p className="quote">
               "Food recovery and redistribution are key strategies for reducing food waste while addressing food insecurity."
+            </p>
+            <p className="stats role-subtitle">
+              {roleHero[activeRole]?.subtitle}
             </p>
             <p className="stats">
               <span className="stat-number">1.3 BILLION TONS</span> of food wasted annually worldwide
             </p>
             <div className="cta-buttons">
-              <button 
-                className="btn-primary"
-                onClick={() => setShowLogin(true)}
-              >
-                Login
-              </button>
-              <button 
+                <button
+                  className="btn-primary"
+                  onClick={() => {
+                    // ensure modal opens with selected role
+                    setLoginData({...loginData, role: activeRole});
+                    setShowLogin(true);
+                  }}
+                >
+                  {`Login as ${activeRole === 'food_donor' ? 'Food Donor' : activeRole === 'recipient_org' ? 'Recipient' : 'Data Analyst'}`}
+                </button>
+              <button
                 className="btn-secondary"
-                onClick={() => setShowRegister(true)}
+                onClick={() => {
+                  // pre-select role for registration modal
+                  setRegisterData({...registerData, role: activeRole});
+                  setShowRegister(true);
+                }}
               >
-                Register
+                {`Register as ${activeRole === 'food_donor' ? 'Food Donor' : activeRole === 'recipient_org' ? 'Recipient' : 'Data Analyst'}`}
               </button>
+              {/* If a user is already logged in, make it obvious how to reach their dashboard */}
+              {user && (
+                <button
+                  className="btn-ghost"
+                  onClick={() => {
+                    // Navigate to the correct dashboard for the authenticated user's role
+                    switch (user.role) {
+                      case 'admin':
+                        navigate('/admin');
+                        break;
+                      case 'food_donor':
+                        navigate('/donor');
+                        break;
+                      case 'recipient_org':
+                        navigate('/recipient');
+                        break;
+                      case 'data_analyst':
+                        navigate('/analyst');
+                        break;
+                      default:
+                        navigate('/');
+                    }
+                  }}
+                >
+                  Go to dashboard
+                </button>
+              )}
             </div>
           </div>
           <div className="hero-image">
             {/* use a local SVG hero to avoid external dependencies */}
             <img src={HeroPeople} alt="People sharing a meal illustration" />
             <div className="hero-photo-caption">Connecting donors and recipients</div>
+          </div>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section id="about" className="about-section">
+        <div className="about-content">
+          <div className="about-image">
+            <img src={PeoplePhoto} alt="Children eating together" />
+          </div>
+          <div className="about-text">
+            <h2>About — FEDF Food Waste Reduction Platform</h2>
+            <p>
+              Build a platform to track and reduce food waste. The app offers solutions to manage food resources more efficiently, help people understand the impact of food waste, and improve overall food security.
+            </p>
+            <ul>
+              <li><strong>Admin:</strong> Manage platform content, oversee user interactions, and ensure data accuracy.</li>
+              <li><strong>Food Donor:</strong> List surplus food, coordinate donations, and track impact.</li>
+              <li><strong>Recipient Organization:</strong> Request food donations, manage logistics, and distribute to those in need.</li>
+              <li><strong>Data Analyst:</strong> Track food waste trends, analyze data, and generate reports to improve efficiency.</li>
+            </ul>
+            <p className="about-note">This project focuses on reducing waste and improving food security by connecting donors and recipients, with admin controls and analytics to measure impact.</p>
           </div>
         </div>
       </section>
@@ -301,7 +363,7 @@ const IndexPage = () => {
 
       {/* Admin Section */}
       <section className="admin-section">
-        <div className="admin-content">
+          <div className="admin-content">
           <h2>Administrator Access</h2>
           <p>Platform management and user administration</p>
           <div className="admin-image">
@@ -310,6 +372,7 @@ const IndexPage = () => {
           <button 
             className="btn-admin"
             onClick={() => {
+              // open login modal with admin role preselected — admin login remains available
               setLoginData({...loginData, role: 'admin'});
               setShowLogin(true);
             }}
@@ -334,6 +397,9 @@ const IndexPage = () => {
           </div>
           <div className="gallery-item">
             <img src={HeroPeople} alt="Community gathering illustration" />
+          </div>
+          <div className="gallery-item">
+            <img src={PeoplePhoto} alt="People eating — photo" />
           </div>
         </div>
       </section>
@@ -380,6 +446,7 @@ const IndexPage = () => {
                   value={loginData.role} 
                   onChange={handleLoginChange}
                 >
+                  <option value="admin">Administrator</option>
                   <option value="food_donor">Food Donor</option>
                   <option value="recipient_org">Recipient Organization</option>
                   <option value="data_analyst">Data Analyst</option>
@@ -458,41 +525,11 @@ const IndexPage = () => {
                   <option value="food_donor">Food Donor</option>
                   <option value="recipient_org">Recipient Organization</option>
                   <option value="data_analyst">Data Analyst</option>
-                  <option value="admin">Administrator</option>
+                    {/* Admin option removed — admins are created only by the super-admin */}
                 </select>
               </div>
               
-              {registerData.role === 'admin' && (
-                <div className="form-group">
-                  <label htmlFor="register-admin-secret">Admin Secret</label>
-                  <input
-                    type="password"
-                    id="register-admin-secret"
-                    name="adminSecret"
-                    value={registerData.adminSecret}
-                    onChange={handleRegisterChange}
-                    placeholder="Enter admin secret key"
-                    required
-                  />
-                  <p className="help-text">Contact system administrator for the secret key</p>
-                </div>
-              )}
-              
-              {registerData.role === 'admin' && (
-                <div className="form-group">
-                  <label htmlFor="register-admin-secret">Admin Secret</label>
-                  <input
-                    type="password"
-                    id="register-admin-secret"
-                    name="adminSecret"
-                    value={registerData.adminSecret}
-                    onChange={handleRegisterChange}
-                    placeholder="Enter admin secret key"
-                    required
-                  />
-                  <p className="help-text">Contact system administrator for the secret key</p>
-                </div>
-              )}
+              {/* Admin creation is not supported via the public registration modal */}
               
               {(registerData.role === 'food_donor' || registerData.role === 'recipient_org') && (
                 <div className="form-group">

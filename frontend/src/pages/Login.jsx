@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Auth.css';
@@ -14,6 +15,14 @@ const Login = () => {
   
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // If login page is opened with a role query param (/login?role=admin) preselect it
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const preRole = params.get('role');
+    if (preRole) setFormData((d) => ({ ...d, role: preRole }));
+  }, [location.search]);
 
   const handleChange = (e) => {
     setFormData({

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Auth.css';
@@ -19,6 +20,13 @@ const Register = () => {
 
   const { register } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const preRole = params.get('role');
+    if (preRole) setFormData((d) => ({ ...d, role: preRole }));
+  }, [location.search]);
 
   const handleChange = (e) => {
     setFormData({
@@ -45,6 +53,10 @@ const Register = () => {
 
     const { confirmPassword, ...registrationData } = formData;
     const result = await register(registrationData);
+
+
+
+    // Admin users should not be created via public registration. The backend allows admin creation only by the super-admin.
 
     if (result.success) {
       // Navigate based on role
@@ -116,7 +128,7 @@ const Register = () => {
               <option value="food_donor">Food Donor</option>
               <option value="recipient_org">Recipient Organization</option>
               <option value="data_analyst">Data Analyst</option>
-              <option value="admin">Admin</option>
+              {/* Admin option removed — admins must be created by the super-admin (initial admin) */}
             </select>
           </div>
 
@@ -162,6 +174,8 @@ const Register = () => {
               onChange={handleChange}
             />
           </div>
+
+          {/* Admin secret input removed from the public registration UI */}
 
           <div className="form-group">
             <label htmlFor="password">Password</label>

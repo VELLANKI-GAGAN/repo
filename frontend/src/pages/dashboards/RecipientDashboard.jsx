@@ -54,6 +54,55 @@ const RecipientDashboard = () => {
 
   if (loading) return <div className="loading">Loading...</div>;
 
+  // Demo fallback data for development / empty states
+  const demoAvailable = [
+    {
+      _id: 'demo-av-1',
+      title: 'Fresh Veg Box',
+      description: 'Seasonal vegetables packaged by local donor.',
+      category: 'produce',
+      quantity: 10,
+      unit: 'boxes',
+      reservedQuantity: 0,
+      expirationDate: new Date(Date.now() + 5 * 24 * 3600 * 1000).toISOString(),
+      storageRequirements: 'room_temperature',
+      pickupLocation: { city: 'Mumbai', state: 'MH' },
+      donor: { organizationName: 'Farmers Market Co' }
+    },
+    {
+      _id: 'demo-av-2',
+      title: 'Prepared Meals',
+      description: 'Boxed prepared meals for immediate distribution.',
+      category: 'prepared_food',
+      quantity: 50,
+      unit: 'servings',
+      reservedQuantity: 0,
+      expirationDate: new Date(Date.now() + 1 * 24 * 3600 * 1000).toISOString(),
+      storageRequirements: 'refrigerated',
+      pickupLocation: { city: 'Pune', state: 'MH' },
+      donor: { organizationName: 'Community Cooks' }
+    }
+  ];
+
+  const demoRequests = [
+    {
+      _id: 'demo-req-1',
+      foodListing: { title: 'Fresh Veg Box', unit: 'boxes' },
+      donor: { organizationName: 'Farmers Market Co' },
+      status: 'pending',
+      requestedQuantity: 2,
+      peopleServed: 0
+    },
+    {
+      _id: 'demo-req-2',
+      foodListing: { title: 'Prepared Meals', unit: 'servings' },
+      donor: { organizationName: 'Community Cooks' },
+      status: 'confirmed',
+      requestedQuantity: 20,
+      peopleServed: 0
+    }
+  ];
+
   // Calculate statistics
   const totalRequests = myRequests.length;
   const pendingRequests = myRequests.filter(r => r.status === 'pending').length;
@@ -100,8 +149,9 @@ const RecipientDashboard = () => {
       <div className="section">
         <h2>Available Food Donations</h2>
         <div className="listings-grid">
-          {availableListings.map((listing) => (
+          {(availableListings.length > 0 ? availableListings : demoAvailable).map((listing) => (
             <div key={listing._id} className="listing-card">
+              {String(listing._id).startsWith('demo') && <div className="demo-badge">Demo</div>}
               <h3>{listing.title}</h3>
               <p className="description">{listing.description}</p>
               <div className="listing-details">
@@ -147,8 +197,9 @@ const RecipientDashboard = () => {
         {myRequests.length > 0 && (
           <div style={{marginBottom: '20px', padding: '15px', background: '#f8f9fa', borderRadius: '8px'}}>
             <h3 style={{marginTop: 0}}>Recent Activity</h3>
-            {myRequests.slice(0, 3).map((request) => (
+            {(myRequests.length > 0 ? myRequests : demoRequests).slice(0, 3).map((request) => (
               <div key={request._id} style={{padding: '8px 0', borderBottom: '1px solid #dee2e6'}}>
+                {String(request._id).startsWith('demo') && <span style={{background:'#FFECB3', padding:'2px 8px', borderRadius:'6px', marginRight:'10px', color:'#7A4A00'}}>Demo</span>}
                 <strong>{request.foodListing?.title}</strong> from <strong>{request.donor?.organizationName || request.donor?.name}</strong>
                 <span style={{marginLeft: '10px', color: request.status === 'completed' ? '#28a745' : request.status === 'confirmed' ? '#007bff' : '#ffc107'}}>
                   ({request.status})
@@ -174,7 +225,7 @@ const RecipientDashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {myRequests.map((request) => (
+              {(myRequests.length > 0 ? myRequests : demoRequests).map((request) => (
                 <tr key={request._id}>
                   <td>{request.foodListing?.title}</td>
                   <td>{request.donor?.organizationName || request.donor?.name}</td>

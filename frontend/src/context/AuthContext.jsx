@@ -29,9 +29,20 @@ export const AuthProvider = ({ children }) => {
       
       return { success: true };
     } catch (error) {
+      // Provide clearer error text when express-validator returns errors array
+      const data = error.response?.data;
+      let message = 'Login failed';
+      if (data) {
+        if (data.message) message = data.message;
+        else if (Array.isArray(data.errors)) message = data.errors.map(e => e.msg || e.message).join('; ');
+        else message = JSON.stringify(data);
+      } else if (error.message) {
+        message = error.message;
+      }
+
       return {
         success: false,
-        error: error.response?.data?.message || 'Login failed'
+        error: message
       };
     }
   };
@@ -47,9 +58,19 @@ export const AuthProvider = ({ children }) => {
       
       return { success: true };
     } catch (error) {
+      const data = error.response?.data;
+      let message = 'Registration failed';
+      if (data) {
+        if (data.message) message = data.message;
+        else if (Array.isArray(data.errors)) message = data.errors.map(e => e.msg || e.message).join('; ');
+        else message = JSON.stringify(data);
+      } else if (error.message) {
+        message = error.message;
+      }
+
       return {
         success: false,
-        error: error.response?.data?.message || 'Registration failed'
+        error: message
       };
     }
   };

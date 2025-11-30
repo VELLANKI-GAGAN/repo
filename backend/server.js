@@ -7,12 +7,56 @@ import userRoutes from './routes/users.js';
 import foodListingRoutes from './routes/foodListings.js';
 import donationRoutes from './routes/donations.js';
 import analyticsRoutes from './routes/analytics.js';
+import User from './models/User.js';
 
 // Load env vars
 dotenv.config();
 
 // Connect to database
 connectDB();
+
+// Ensure a default super admin user exists (only created if no admin found)
+const ensureSuperAdmin = async () => {
+  try {
+    const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || 'admin@gmail.com';
+    const SUPER_ADMIN_PASS = process.env.SUPER_ADMIN_PASSWORD || 'admin123';
+
+    const existing = await User.findOne({ email: SUPER_ADMIN_EMAIL });
+    if (!existing) {
+      console.log('Super admin not found — creating default admin', SUPER_ADMIN_EMAIL);
+      const user = await User.create({
+        name: 'Super Admin',
+        email: SUPER_ADMIN_EMAIL,
+        password: SUPER_ADMIN_PASS,
+        role: 'admin',
+        isVerified: true
+      });
+      console.log('Default super admin created:', user.email);
+    } else {
+      console.log('Super admin exists:', existing.email);
+      // If a super-admin exists but its password does not match the configured default
+      // (useful during local development), overwrite it with the configured SUPER_ADMIN_PASS.
+      // NOTE: This is intentional to help local development and should not be used
+      // in production environments. Use env vars and secure rotation in production.
+      try {
+        // user.comparePassword uses bcrypt which is available via model method
+        const matches = await existing.comparePassword(SUPER_ADMIN_PASS);
+        if (!matches) {
+          console.log('Super admin password mismatch — resetting password to the configured value');
+          existing.password = SUPER_ADMIN_PASS;
+          await existing.save();
+          console.log('Super admin password updated');
+        }
+      } catch (err) {
+        console.error('Error checking/updating super-admin password:', err.message || err);
+      }
+    }
+  } catch (err) {
+    console.error('Failed to ensure super admin', err.message || err);
+  }
+};
+
+ensureSuperAdmin();
 
 const app = express();
 

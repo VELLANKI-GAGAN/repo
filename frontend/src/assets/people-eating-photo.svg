@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Simple inline SVG placeholder illustrating people sharing a meal. This ensures the About image renders until you replace with a real photo. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="520" viewBox="0 0 800 520" role="img" aria-label="People eating together illustration">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f2fbff" />
+      <stop offset="100%" stop-color="#eaf6f6" />
+    </linearGradient>
+    <linearGradient id="plate" x1="0" x2="1">
+      <stop offset="0%" stop-color="#fff" />
+      <stop offset="100%" stop-color="#f0f0f0" />
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#bg)" />
+
+  <!-- Table -->
+  <rect x="80" y="320" width="640" height="60" rx="18" fill="#b2dccc" opacity="0.9" />
+
+  <!-- Plates -->
+  <g>
+    <ellipse cx="210" cy="300" rx="70" ry="40" fill="url(#plate)" />
+    <ellipse cx="400" cy="300" rx="70" ry="40" fill="url(#plate)" />
+    <ellipse cx="590" cy="300" rx="70" ry="40" fill="url(#plate)" />
+  </g>
+
+  <!-- People simplified heads -->
+  <g fill="#ffd5b0">
+    <circle cx="210" cy="240" r="34" />
+    <circle cx="400" cy="240" r="34" />
+    <circle cx="590" cy="240" r="34" />
+  </g>
+
+  <!-- Simple torsos -->
+  <g fill="#3a8d89">
+    <rect x="168" y="268" width="84" height="58" rx="12" />
+    <rect x="358" y="268" width="84" height="58" rx="12" />
+    <rect x="548" y="268" width="84" height="58" rx="12" />
+  </g>
+
+  <!-- Utensils / food dots -->
+  <g fill="#f28c8c">
+    <circle cx="210" cy="300" r="8" />
+    <circle cx="400" cy="300" r="10" />
+    <circle cx="590" cy="300" r="7" />
+  </g>
+
+  <!-- Friendly headline -->
+  <text x="80" y="460" font-family="Verdana, Arial, sans-serif" font-size="22" fill="#23464b">Sharing meals, saving food</text>
+  <text x="80" y="486" font-family="Verdana, Arial, sans-serif" font-size="14" fill="#3b6f70">Connecting donors and recipients to reduce food waste and nourish communities.</text>
+</svg>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Placeholder SVG for attached people-eating photo. Replace this file with the real JPG/PNG when available. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 280">
+  <rect width="100%" height="100%" fill="#f7fbff"/>
+  <g transform="translate(18,16)">
+    <rect x="0" y="0" width="364" height="248" rx="16" fill="#fff" stroke="#eee"/>
+    <text x="32" y="46" font-size="18" font-family="sans-serif" fill="#3b3b3b" font-weight="700">People eating together</text>
+    <g transform="translate(20,70)">
+      <rect width="320" height="120" rx="10" fill="#e6f7ff"/>
+      <circle cx="48" cy="60" r="36" fill="#ffd6a5"/>
+      <circle cx="160" cy="60" r="36" fill="#caffbf"/>
+      <circle cx="272" cy="60" r="36" fill="#ffd6a5"/>
+      <rect x="38" y="80" width="80" height="18" rx="8" fill="#fff4e6"/>
+      <rect x="150" y="80" width="80" height="18" rx="8" fill="#fff4e6"/>
+      <rect x="262" y="80" width="80" height="18" rx="8" fill="#fff4e6"/>
+    </g>
+    <text x="28" y="220" font-size="12" font-family="sans-serif" fill="#7a7a7a">(Replace this placeholder with your attached image at src/assets/people-eating-photo.svg or a JPG in public/)</text>
+  </g>
+</svg>
